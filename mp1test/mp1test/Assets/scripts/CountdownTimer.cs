@@ -1,18 +1,19 @@
 using UnityEngine;
-using TMPro; // Needed for TextMeshPro
+using TMPro;
 
 public class CountdownTimer : MonoBehaviour
 {
     [Header("Component References")]
-    public TMP_Text timerText; // Drag your Text object here
+    public TMP_Text timerText;
+    public Transform player;      // Drag your XR Rig / Player object here
+    public Transform losePosition; // Drag your "Lose" empty GameObject here
 
     [Header("Timer Settings")]
-    public float timeRemaining = 600f; // Start time in seconds
+    public float timeRemaining = 60f;
     public bool timerIsRunning = false;
 
     private void Start()
     {
-        // Starts the timer automatically when the UI loads
         timerIsRunning = true;
     }
 
@@ -36,19 +37,43 @@ public class CountdownTimer : MonoBehaviour
 
     void UpdateTimerDisplay(float timeToDisplay)
     {
-        timeToDisplay += 1; // Adds 1 so the timer doesn't show "0" for a whole second
+        timeToDisplay += 1;
         float minutes = Mathf.FloorToInt(timeToDisplay / 60);
         float seconds = Mathf.FloorToInt(timeToDisplay % 60);
-
-        // Formats the text as 00:00
         timerText.text = string.Format("{0:00}:{1:00}", minutes, seconds);
     }
 
     void PerformTimerEndActions()
     {
-        // Optional: Change text color to red or trigger the quit automatically
+        // UI Updates
         timerText.text = "00:00";
         timerText.color = Color.red;
-        Debug.Log("Time is up!");
+        Debug.Log("Time is up! Teleporting...");
+
+        // TELEPORT LOGIC
+        if (player != null && losePosition != null)
+        {
+            // 1. Temporarily disable CharacterController (if present)
+            // This prevents the physics system from snapping the player back to the old spot
+            CharacterController cc = player.GetComponent<CharacterController>();
+            if (cc != null)
+            {
+                cc.enabled = false;
+            }
+
+            // 2. Move the Player
+            player.position = losePosition.position;
+            player.rotation = losePosition.rotation;
+
+            // 3. Re-enable CharacterController
+            if (cc != null)
+            {
+                cc.enabled = true;
+            }
+        }
+        else
+        {
+            Debug.LogError("Player or LosePosition is not assigned in the Inspector!");
+        }
     }
 }

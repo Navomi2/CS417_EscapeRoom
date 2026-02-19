@@ -8,6 +8,8 @@ public class CountdownTimer : MonoBehaviour
     public Transform player;      // Drag your XR Rig / Player object here
     public Transform losePosition; // Drag your "Lose" empty GameObject here
 
+    public Transform playerUI;
+
     [Header("Timer Settings")]
     public float timeRemaining = 60f;
     public bool timerIsRunning = false;
@@ -53,7 +55,7 @@ public class CountdownTimer : MonoBehaviour
         // TELEPORT LOGIC
         if (player != null && losePosition != null)
         {
-            // 1. Temporarily disable CharacterController (if present)
+            // Temporarily disable CharacterController (if present)
             // This prevents the physics system from snapping the player back to the old spot
             CharacterController cc = player.GetComponent<CharacterController>();
             if (cc != null)
@@ -61,11 +63,21 @@ public class CountdownTimer : MonoBehaviour
                 cc.enabled = false;
             }
 
-            // 2. Move the Player
+            // Move the Player
             player.position = losePosition.position;
             player.rotation = losePosition.rotation;
 
-            // 3. Re-enable CharacterController
+            // move the ui
+            Vector3 uiPos = losePosition.position;
+            uiPos.x -= 3f;
+            uiPos.z -= 3f;
+
+            playerUI.position = uiPos;
+            playerUI.LookAt(losePosition);
+
+            playerUI.Rotate(0f, 180f, 0f);
+
+            // Re-enable CharacterController
             if (cc != null)
             {
                 cc.enabled = true;
